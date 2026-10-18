@@ -1,0 +1,47 @@
+[build-system]
+requires = ["uv_build==0.12.23"]
+build-backend = "uv_build"
+
+[project]
+name = "civic-service-requests"
+version = "0.1.0"
+description = "A small, replayable NYC 311 data product on Google Cloud."
+readme = "README.md"
+authors = [{ name = "Ahmed Osman" }]
+requires-python = ">=3.14,<3.15"
+dependencies = [
+  "google-cloud-bigquery==3.46.2",
+  "google-cloud-storage==3.17.1",
+  "masoora==0.3.0",
+  "pydantic==2.14.1",
+  "requests==2.34.2",
+  "typer==0.27.3",
+]
+
+[project.scripts]
+civic-data = "civic_service_requests.cli:main"
+
+[dependency-groups]
+dev = ["ruff==0.17.1"]
+
+[tool.uv]
+required-version = ">=0.13.1,<0.14"
+package = true
+default-groups = ["dev"]
+
+[tool.uv.build-backend]
+module-name = "civic_service_requests"
+module-root = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

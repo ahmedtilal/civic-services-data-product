@@ -1,0 +1,92 @@
+product:
+  id: civic_service_requests
+  name: Civic Service Requests
+  domain: civic services
+  version: 1
+  contract_status: draft
+  description: >-
+    A documented, replayable product for analyzing NYC service requests over time
+    and by agency, problem category, borough, and location.
+
+source:
+  name: NYC Open Data 311 Service Requests from 2020 to Present
+  dataset_id: erm2-nwe9
+  url: https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9
+  csv_endpoint: https://data.cityofnewyork.us/resource/erm2-nwe9.csv
+  first_batch:
+    created_at_start_inclusive: "2025-01-01"
+    created_at_end_exclusive: "2025-01-08"
+    status: proposed
+    note: This bounded window has not yet been profiled or captured.
+
+input_port:
+  format: csv
+  storage: google-cloud-storage
+  bucket: configured-in-terraform
+  object_prefix: civic_service_requests/run_id={run_id}/
+  completion_marker: manifest.json
+  preserve_source_bytes: true
+
+intermediate:
+  storage: bigquery
+  dataset: civic_services_staging
+  table: to-be-defined
+
+output_port:
+  storage: bigquery
+  dataset: civic_services_products
+  table: civic_service_requests
+  schema:
+    - name: request_id
+      type: STRING
+      source_field: unique_key
+      nullable: false
+      unique: true
+    - name: created_at
+      type: DATETIME
+      source_field: created_date
+      nullable: false
+      timezone_in_source: false
+    - name: closed_at
+      type: DATETIME
+      source_field: closed_date
+      nullable: true
+      timezone_in_source: false
+    - name: agency_code
+      type: STRING
+      source_field: agency
+      nullable: true
+    - name: problem_category
+      type: STRING
+      source_field: complaint_type
+      nullable: true
+    - name: problem_detail
+      type: STRING
+      source_field: descriptor
+      nullable: true
+    - name: status
+      type: STRING
+      source_field: status
+      nullable: true
+      allow_new_values: true
+    - name: borough
+      type: STRING
+      source_field: borough
+      nullable: true
+    - name: latitude
+      type: FLOAT64
+      source_field: latitude
+      nullable: true
+    - name: longitude
+      type: FLOAT64
+      source_field: longitude
+      nullable: true
+
+quality:
+  reject_missing_request_id: true
+  reject_unparseable_created_at: true
+  allow_null_closed_at: true
+  allow_null_coordinates: true
+  report_null_rates: true
+  require_idempotent_publication: true
+  freshness_sla: none
