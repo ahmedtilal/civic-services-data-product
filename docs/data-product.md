@@ -10,10 +10,30 @@ The product supports analysis of NYC service requests over time and by respondin
 
 - **Source:** NYC Open Data, [311 Service Requests from 2020 to Present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9), dataset `erm2-nwe9`.
 - **CSV endpoint:** `https://data.cityofnewyork.us/resource/erm2-nwe9.csv`.
-- **Tutorial window:** `created_date >= 2025-01-01T00:00:00` and `created_date < 2025-01-08T00:00:00`. This is a proposed bounded batch, not a measured row-count estimate. Capture and retain the exact extract during tutorial preparation.
+- **Tutorial window:** `created_date >= 2025-01-01T00:00:00` and `created_date < 2025-01-08T00:00:00`. The size of this window was measured once in part 2; see [Observed source measurements](#observed-source-measurements). The source can change, so a later run may differ.
 - The source is updated daily and may change historical values. A run records the request bounds and retrieval time; the result is the set of responses received, not a transactionally consistent source snapshot.
 
 See NYC's [dataset update notes](https://www.nyc.gov/opendata/news/all-news/311-Service-Requests-Updates) and [column metadata](https://data.cityofnewyork.us/api/views/erm2-nwe9/columns.json).
+
+## Observed source measurements
+
+Measured from the live source with [the exploration notebook](../notebooks/nyc_311_exploration.py) on 21 November 2026 (about 13:15 UTC). These are point-in-time observations for the 1–7 January 2025 window, not guarantees.
+
+| Observation | Value |
+|---|---|
+| Rows with `created_date` in the window | 90,575 (count query), 90,575 (rows downloaded) |
+| CSV pages at 10,000 rows per page | 10 |
+| CSV bytes downloaded for the window | 65,098,424 (about 65.1 MB) |
+| Size estimated from the sample before downloading | about 64 MB |
+| Distinct `unique_key` values in the window | 90,575, so no duplicates in this download |
+| Rows with an empty `created_date` in the window | 0 |
+
+The sample was 200 rows from each of the 7 days, ordered by `created_date` and `unique_key` (1,400 rows, 44 columns, all ten fields in the draft contract present):
+
+- `latitude` and `longitude` were empty in about 0.2% of sampled rows. The other contract fields had no empty values in the sample.
+- The sample had 59 distinct `complaint_type` values, five borough values, and only two `status` values (`Closed`, `Unspecified`).
+
+The sample is the earliest rows of each day, so it is not representative. Do not infer null rates or the full set of statuses from it. The contract still allows a null `closed_at`, `latitude`, and `longitude`, and treats `status` and category values as open-ended. Null rates and uniqueness over a landed batch are checked by the pipeline in later parts.
 
 ## Ports and storage
 

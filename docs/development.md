@@ -17,6 +17,16 @@ make sync
 
 No cloud account or credentials are needed until part 6, which adds the Google Cloud setup.
 
+## Notebook
+
+The source exploration notebook is a marimo app stored as a Python file. It lists its own pinned dependencies in inline script metadata, so it does not need the project environment:
+
+```sh
+uvx marimo edit --sandbox notebooks/nyc_311_exploration.py
+```
+
+To check that every cell runs without opening an editor, run `uv run --script notebooks/nyc_311_exploration.py`. It reads from the NYC Open Data API and writes nothing. The final cell downloads the whole window only if you switch it on.
+
 ## Make targets
 
 | Command | Purpose |

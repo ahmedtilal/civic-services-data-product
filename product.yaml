@@ -16,8 +16,14 @@ source:
   first_batch:
     created_at_start_inclusive: "2025-01-01"
     created_at_end_exclusive: "2025-01-08"
-    status: proposed
-    note: This bounded window has not yet been profiled or captured.
+    status: measured
+    measured_at: "2026-11-21"
+    observed_row_count: 90575
+    observed_csv_bytes: 65098424
+    observed_pages_of_10000: 10
+    note: >-
+      Point-in-time measurement from the live source; the source can change.
+      See docs/data-product.md.
 
 # Storage is local until part 6 maps these layers to Cloud Storage and BigQuery.
 input_port:

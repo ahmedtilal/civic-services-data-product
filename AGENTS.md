@@ -10,7 +10,10 @@ Use the full product ID `civic_service_requests`. The first source is the NYC Op
 
 Each part of the series is a branch, and a branch is the previous one plus one squashed commit. See [the roadmap](docs/roadmap.md) for the list. This file describes the branch it is on: update it in the same commit that changes what the branch contains, and do not describe code or infrastructure that a later branch adds.
 
-**Current branch: `part-01-design-and-requirements` (articles 1–2).** It contains the package scaffold, `product.yaml`, and the architecture and contract docs. There is no pipeline code, no tests, and no cloud resources yet.
+**Current branch: `part-02-explore-source` (article 3).** It adds a marimo exploration notebook, `notebooks/nyc_311_exploration.py`, and records measured source volume in the contract docs. There is no pipeline code, no tests, and no cloud resources yet.
+
+- The notebook declares its own dependencies with inline script metadata, pinned, so `pyproject.toml` stays unchanged until a part's runtime code needs a package. It reads from the source only and writes nothing.
+- Record measured source numbers with the date and a note that they are point-in-time. Never record an estimate as a measurement.
 
 Later parts add these rules to this file as the matching code lands:
 

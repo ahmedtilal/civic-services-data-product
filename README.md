@@ -8,7 +8,7 @@ The project is local first. It starts with the product boundary, a versioned Pyt
 
 Each part of the series is a branch. A branch is the previous branch plus one commit, so the diff between neighbouring branches is the change its article describes. See the [series roadmap](docs/roadmap.md) for the full list.
 
-You are on `part-01-design-and-requirements`, which covers articles 1 and 2.
+You are on `part-02-explore-source`, which covers article 3.
 
 ## Quick start
 
@@ -42,6 +42,7 @@ Use `make check` to run Ruff lint and formatting checks. See [Development](docs/
 ```text
 .
 ├── docs/
+├── notebooks/
 ├── src/civic_service_requests/
 ├── product.yaml
 ├── Makefile
@@ -50,6 +51,10 @@ Use `make check` to run Ruff lint and formatting checks. See [Development](docs/
 
 ## Data source
 
-The product uses NYC Open Data’s [311 Service Requests dataset](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9). The first bounded tutorial window is proposed as 1–7 January 2025; the observed row count and captured extract size are recorded in part 2.
+The product uses NYC Open Data’s [311 Service Requests dataset](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9). The first bounded tutorial window is 1–7 January 2025. Its measured row count and extract size are in the [data product contract](docs/data-product.md#observed-source-measurements). To explore the source yourself, open the notebook:
 
-No cloud project ID, billing account, credentials, or source extract is included in this branch.
+```sh
+uvx marimo edit --sandbox notebooks/nyc_311_exploration.py
+```
+
+The notebook only reads from the source and writes nothing. No cloud project ID, billing account, credentials, or source extract is included in this branch.
