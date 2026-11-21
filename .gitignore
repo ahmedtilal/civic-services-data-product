@@ -36,3 +36,12 @@ override.tf.json
 .DS_Store
 .vscode/
 .idea/
+
+# Agent and planning workspace
+.scratch/
+.claude/
+
+# Local pipeline data (used from part 3 onward)
+data/
+*.duckdb
+*.duckdb.wal

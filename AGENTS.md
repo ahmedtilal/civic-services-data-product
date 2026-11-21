@@ -6,35 +6,56 @@ This repository implements the Civic Service Requests data product for the **Bui
 
 Use the full product ID `civic_service_requests`. The first source is the NYC Open Data 311 dataset `erm2-nwe9`. This is one domain product and a learning project; do not claim that it demonstrates independent mesh teams or organization-wide data mesh governance.
 
+## Branches and this file
+
+Each part of the series is a branch, and a branch is the previous one plus one squashed commit. See [the roadmap](docs/roadmap.md) for the list. This file describes the branch it is on: update it in the same commit that changes what the branch contains, and do not describe code or infrastructure that a later branch adds.
+
+**Current branch: `part-01-design-and-requirements` (articles 1–2).** It contains the package scaffold, `product.yaml`, and the architecture and contract docs. There is no pipeline code, no tests, and no cloud resources yet.
+
+Later parts add these rules to this file as the matching code lands:
+
+- **Part 3** (`part-03-land-raw-locally`): Masoora pipelines, Pydantic run contexts, the raw-store interface, and the raw landing and manifest rules.
+- **Part 4**: the intermediate layer and the `staging` DuckDB schema.
+- **Part 5**: the quality gate and the `products` output view.
+- **Part 6**: Google Cloud, Terraform, `europe-west2`, and credential rules.
+- **Part 7**: scheduling, logging fields, and alerts.
+
 ## Architecture constraints
 
 - Keep the installable package under `src/civic_service_requests/`; keep the Typer CLI thin.
-- Use Pydantic at command and pipeline boundaries. Masoora wires in-process pipeline steps; it is not durable storage, a scheduler, or a persistent catalog.
-- Preserve source responses unchanged in Cloud Storage with a run manifest. Only manifest-complete runs are inputs to downstream stages.
-- Keep intermediate BigQuery data in `civic_services_staging`; expose the consumer contract through `civic_services_products`.
-- Keep Cloud Storage and BigQuery co-located in `europe-west2` for the tutorial deployment.
+- Use Pydantic at command and pipeline boundaries.
+- The project is local first. Do not add cloud dependencies, credentials, or infrastructure before part 6.
+- Keep consumer-facing output separate from raw files and internal staging data.
 - Make writes safe to retry. The live NYC source can change older rows, so never imply that created-date filtering alone gives a freshness guarantee.
 - Do not publish a freshness SLA until source changes and schedule behavior have been measured.
-- Keep raw paths and internal staging tables out of the consumer contract.
 
 ## Python workflow
 
 - Use Python 3.14 for the current supported runtime and respect the range in `pyproject.toml`.
-- Manage dependencies and the environment with uv. Pin direct dependencies in `pyproject.toml`, update `uv.lock`, and use `uv sync --locked` for normal installs.
+- Manage dependencies and the environment with uv. Pin direct dependencies in `pyproject.toml`, update `uv.lock`, and use `uv sync --locked` for normal installs. Add a dependency only in the part that first uses it.
 - Keep Ruff configuration in `pyproject.toml`; use `make check` for lint and formatting checks.
-- Put runtime code in the source package. Keep cloud access behind small interfaces so local command help and pure transformations do not need credentials.
+- Put runtime code in the source package. Keep storage behind small interfaces so command help and pure transformations do not need credentials.
 - Add meaningful checks for parsing, row quality, idempotency, and manifest handling when those features are implemented.
 
 ## Security and operations
 
-- Use Application Default Credentials locally and the attached service account on Cloud Run. Never add service-account key files, tokens, or real project identifiers.
+- Never add service-account key files, tokens, or real project identifiers.
 - Do not log source row payloads or credentials. Log run identifiers, requested bounds, counts, duration, and outcome.
-- Keep Terraform state, local `.tfvars`, build output, virtual environments, and caches out of Git.
-- Review `terraform plan` before applying infrastructure. A budget alert is a warning, not a spending cap.
+- Keep local data, `.env` files, build output, virtual environments, and caches out of Git. `.scratch/` and `.claude/` are ignored.
 
 ## Documentation
 
 - Keep `product.yaml`, [the data product contract](docs/data-product.md), and [the architecture](docs/architecture.md) aligned.
 - Label proposed values and cost estimates. Do not invent a source row count, measured cost, contact, or operational result.
-- Link technical claims to primary NYC Open Data, Google Cloud, Python, or package documentation.
-- Keep the series roadmap aligned with the workspace product architecture.
+- Link technical claims to primary NYC Open Data, Python, package, or (from part 6) Google Cloud documentation. Masoora documentation is at <https://ahmedtilal.github.io/masoora/>.
+- Keep the series roadmap aligned with the workspace product architecture and with the articles in `/Users/ahmed/workspace/atosman/content/articles`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues, with one milestone per part of the series. See `docs/agents/issue-tracker.md`. `.scratch/` is for local notes only and is gitignored.
+
+### Domain docs
+
+This is a single-context repo; read the root `GLOSSARY.md` and relevant ADRs in `docs/adr/`. See `docs/agents/domain.md`.

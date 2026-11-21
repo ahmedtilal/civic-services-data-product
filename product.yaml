@@ -19,66 +19,66 @@ source:
     status: proposed
     note: This bounded window has not yet been profiled or captured.
 
+# Storage is local until part 6 maps these layers to Cloud Storage and BigQuery.
 input_port:
   format: csv
-  storage: google-cloud-storage
-  bucket: configured-in-terraform
-  object_prefix: civic_service_requests/run_id={run_id}/
+  storage: local-filesystem
+  path: data/raw/{run_id}/
   completion_marker: manifest.json
   preserve_source_bytes: true
 
 intermediate:
-  storage: bigquery
-  dataset: civic_services_staging
-  table: to-be-defined
+  storage: duckdb
+  schema: staging
+  table: service_requests
 
 output_port:
-  storage: bigquery
-  dataset: civic_services_products
-  table: civic_service_requests
-  schema:
+  storage: duckdb
+  schema: products
+  view: civic_service_requests
+  schema_fields:
     - name: request_id
-      type: STRING
+      type: VARCHAR
       source_field: unique_key
       nullable: false
       unique: true
     - name: created_at
-      type: DATETIME
+      type: TIMESTAMP
       source_field: created_date
       nullable: false
       timezone_in_source: false
     - name: closed_at
-      type: DATETIME
+      type: TIMESTAMP
       source_field: closed_date
       nullable: true
       timezone_in_source: false
     - name: agency_code
-      type: STRING
+      type: VARCHAR
       source_field: agency
       nullable: true
     - name: problem_category
-      type: STRING
+      type: VARCHAR
       source_field: complaint_type
       nullable: true
     - name: problem_detail
-      type: STRING
+      type: VARCHAR
       source_field: descriptor
       nullable: true
     - name: status
-      type: STRING
+      type: VARCHAR
       source_field: status
       nullable: true
       allow_new_values: true
     - name: borough
-      type: STRING
+      type: VARCHAR
       source_field: borough
       nullable: true
     - name: latitude
-      type: FLOAT64
+      type: DOUBLE
       source_field: latitude
       nullable: true
     - name: longitude
-      type: FLOAT64
+      type: DOUBLE
       source_field: longitude
       nullable: true
 

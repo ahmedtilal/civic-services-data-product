@@ -2,7 +2,7 @@
 
 ## Supported toolchain
 
-This scaffold uses Python 3.14, uv 0.13.1 or later in the 0.13 series, and Ruff 0.17.1. These are the versions checked for the initial scaffold on 18 October 2026. Python 3.15 is now stable, but the current Masoora and Google Cloud package metadata lists support through Python 3.14; use 3.14 until those dependencies declare and verify 3.15 support.
+This scaffold uses Python 3.14, uv 0.13.1 or later in the 0.13 series, and Ruff 0.17.1. These are the versions checked for the initial scaffold on 18 October 2026. Python 3.15 is now stable, but the dependencies this series adds (Masoora and the Google Cloud clients) list support through Python 3.14; use 3.14 until they declare and verify 3.15 support.
 
 The exact direct dependency versions are recorded in `pyproject.toml` and `uv.lock`. Ruff configuration also lives in `pyproject.toml`.
 
@@ -15,14 +15,7 @@ uv python install 3.14
 make sync
 ```
 
-For local GCP development, authenticate with Application Default Credentials:
-
-```sh
-gcloud auth application-default login
-export GOOGLE_CLOUD_PROJECT="your-project-id"
-```
-
-Use a real project ID only in your local shell or an untracked environment file. Do not create or download service-account keys for local development.
+No cloud account or credentials are needed until part 6, which adds the Google Cloud setup.
 
 ## Make targets
 
