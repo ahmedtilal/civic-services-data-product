@@ -59,6 +59,10 @@ Later parts add these rules to this file as the matching code lands:
 
 Issues live in GitHub Issues, with one milestone per part of the series. See `docs/agents/issue-tracker.md`. `.scratch/` is for local notes only and is gitignored.
 
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
 ### Domain docs
 
 This is a single-context repo; read the root `GLOSSARY.md` and relevant ADRs in `docs/adr/`. See `docs/agents/domain.md`.
