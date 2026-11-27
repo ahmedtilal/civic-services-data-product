@@ -10,14 +10,29 @@ Use the full product ID `civic_service_requests`. The first source is the NYC Op
 
 Each part of the series is a branch, and a branch is the previous one plus one squashed commit. See [the roadmap](docs/roadmap.md) for the list. This file describes the branch it is on: update it in the same commit that changes what the branch contains, and do not describe code or infrastructure that a later branch adds.
 
-**Current branch: `part-02-explore-source` (article 3).** It adds a marimo exploration notebook, `notebooks/nyc_311_exploration.py`, and records measured source volume in the contract docs. There is no pipeline code, no tests, and no cloud resources yet.
+**Current branch: `part-03-land-raw-locally` (article 4).** It adds `civic-data land-raw`, a Masoora pipeline that lands one batch as byte-for-byte CSV pages plus a manifest in a local raw store, with pytest tests and [ADR 0001](docs/adr/0001-run-completeness-and-reconciliation.md). There is no intermediate layer, no DuckDB, and no cloud resources yet.
 
-- The notebook declares its own dependencies with inline script metadata, pinned, so `pyproject.toml` stays unchanged until a part's runtime code needs a package. It reads from the source only and writes nothing.
-- Record measured source numbers with the date and a note that they are point-in-time. Never record an estimate as a measurement.
+- The exploration notebook (`notebooks/nyc_311_exploration.py`) still declares its own pinned dependencies and writes nothing.
+- Record measured source numbers with the date and a note that they are point-in-time. Never record an estimate as a measurement. Tests must not depend on live source numbers.
+
+### Masoora and run contexts
+
+- Masoora wires steps in process only. It is not storage, a scheduler, or a catalog.
+- Each pipeline has a Pydantic `PipelineContext` subclass that validates options (window bounds, page size, retries) before any request. The Typer CLI only builds the context, calls the pipeline's `run`, and unwraps `StepExecutionError` into a clear message and exit code.
+- Build pipelines with a factory that takes the source and store (`build_pipeline(source, store)`), so tests inject fakes.
+
+### Raw store, landing, and manifest rules
+
+- Storage sits behind the `RawStore` interface; `LocalRawStore` writes `data/raw/<run-id>/`. Manifest page paths are relative to the raw root. Do not add cloud code before part 6.
+- Keep pages byte-for-byte as received. Never rewrite, reformat, or delete a page.
+- Write the manifest last and atomically. Its presence is the only thing that makes a run complete; incomplete runs are kept and ignored, never cleaned up or resumed.
+- Reruns create a new run ID and new files; never overwrite an earlier run. Downstream reads the latest complete run for a batch.
+- Retries default to 0. The source count is recorded, not enforced. Paging is not locked, so skipped rows are possible; only repeated `unique_key` values are counted.
+- Tests need no network. Their layout and scope are in [the coding standards](CODING_STANDARDS.md#tests).
+- Logs carry run ID, bounds, counts, duration, and outcome only.
 
 Later parts add these rules to this file as the matching code lands:
 
-- **Part 3** (`part-03-land-raw-locally`): Masoora pipelines, Pydantic run contexts, the raw-store interface, and the raw landing and manifest rules.
 - **Part 4**: the intermediate layer and the `staging` DuckDB schema.
 - **Part 5**: the quality gate and the `products` output view.
 - **Part 6**: Google Cloud, Terraform, `europe-west2`, and credential rules.
@@ -26,6 +41,8 @@ Later parts add these rules to this file as the matching code lands:
 ## Architecture constraints
 
 - Keep the installable package under `src/civic_service_requests/`; keep the Typer CLI thin.
+- Each pipeline is a package, `pipelines/<name>/`: `context.py`, `read.py`, `transform.py`, `write.py` for its steps, and `pipeline.py` with `build_pipeline` and `run`. Add `transform.py` only when there is a transform. Code shared by pipelines (manifest, raw store, source) sits at the package root. Other code imports a pipeline through its `__init__.py`; the CLI may also import its default constants from `context.py`.
+- Read [the coding standards](CODING_STANDARDS.md) before writing or reviewing Python or tests.
 - Use Pydantic at command and pipeline boundaries.
 - The project is local first. Do not add cloud dependencies, credentials, or infrastructure before part 6.
 - Keep consumer-facing output separate from raw files and internal staging data.
@@ -36,7 +53,7 @@ Later parts add these rules to this file as the matching code lands:
 
 - Use Python 3.14 for the current supported runtime and respect the range in `pyproject.toml`.
 - Manage dependencies and the environment with uv. Pin direct dependencies in `pyproject.toml`, update `uv.lock`, and use `uv sync --locked` for normal installs. Add a dependency only in the part that first uses it.
-- Keep Ruff configuration in `pyproject.toml`; use `make check` for lint and formatting checks.
+- Keep Ruff configuration in `pyproject.toml`; run `make check` (lint, format, Pyrefly types, tests) before every commit; CI runs the same target on every pull request.
 - Put runtime code in the source package. Keep storage behind small interfaces so command help and pure transformations do not need credentials.
 - Add meaningful checks for parsing, row quality, idempotency, and manifest handling when those features are implemented.
 

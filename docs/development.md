@@ -13,6 +13,7 @@ Install uv using the [official Astral instructions](https://docs.astral.sh/uv/ge
 ```sh
 uv python install 3.14
 make sync
+make hooks
 ```
 
 No cloud account or credentials are needed until part 6, which adds the Google Cloud setup.
@@ -37,10 +38,19 @@ To check that every cell runs without opening an editor, run `uv run --script no
 | `make lint` | Run Ruff lint checks |
 | `make format` | Format Python files with Ruff |
 | `make format-check` | Check formatting without changing files |
-| `make check` | Run lint and formatting checks |
+| `make test` | Run the pytest suite |
+| `make typecheck` | Run Pyrefly type checks |
+| `make check` | Run lint, formatting checks, type checks, and tests |
+| `make hooks` | Enable the Git pre-push hook |
 | `make clean` | Remove local environments, caches, and build output |
 
-The initial `check` target does not run a test suite. Add focused tests alongside parsing, quality, idempotency, and manifest behavior as those features are implemented.
+Tests use an in-process fake of the NYC CSV endpoint and a temporary raw store, so they need no network or credentials. Add focused tests alongside quality and idempotency behavior as those features are implemented.
+
+## Continuous integration
+
+After `make hooks`, [a pre-push hook](../.githooks/pre-push) runs `make check` before each push. It checks the working tree, so commit or stash other changes first.
+
+[The check workflow](../.github/workflows/check.yml) runs `make check` on every pull request.
 
 ## Dependencies
 

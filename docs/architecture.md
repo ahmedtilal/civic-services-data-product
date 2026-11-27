@@ -45,8 +45,10 @@ The planned pipeline commands are:
 
 ## Reliability boundaries
 
-- Each run receives a unique run ID and preserves its source input for replay.
-- Downstream stages read only runs that have a completion manifest.
+- Each run receives a unique run ID (a UTC timestamp plus a short random suffix, so listings sort by time) and preserves its source input for replay. See [ADR 0001](adr/0001-run-completeness-and-reconciliation.md).
+- Downstream stages read only runs that have a completion manifest, and take the latest complete run for a batch.
+- A page request that fails stops the run by default. `--retries` sets a bounded number of retries per page; a run that exhausts them stays incomplete, and its pages are kept.
+- Paging is not locked. Rows can be skipped or repeated at page boundaries while the live source changes. The manifest counts repeated `unique_key` values and records the source's own count as an observation; a later run of the same batch catches skipped rows.
 - Writes must be safe to retry; a rerun of the same batch must not duplicate output.
 - The NYC source may revise older records. A created-date window is a bounded batch, not a complete incremental-change strategy.
 - No freshness SLA is published until update behavior and scheduled runs have been measured.

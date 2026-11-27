@@ -10,6 +10,9 @@ readme = "README.md"
 authors = [{ name = "Ahmed Osman" }]
 requires-python = ">=3.14,<3.15"
 dependencies = [
+  "httpx==0.28.1",
+  "masoora==0.3.0",
+  "polars==2.1.0",
   "pydantic==2.14.1",
   "typer==0.27.3",
 ]
@@ -18,7 +21,19 @@ dependencies = [
 civic-data = "civic_service_requests.cli:main"
 
 [dependency-groups]
-dev = ["ruff==0.17.1"]
+dev = [
+  "pyrefly==1.5.0",
+  "pytest==9.2.0",
+  "ruff==0.17.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.pyrefly]
+preset = "default"
+project-includes = ["src", "tests"]
 
 [tool.uv]
 required-version = ">=0.13.1,<0.14"

@@ -8,7 +8,7 @@ The project is local first. It starts with the product boundary, a versioned Pyt
 
 Each part of the series is a branch. A branch is the previous branch plus one commit, so the diff between neighbouring branches is the change its article describes. See the [series roadmap](docs/roadmap.md) for the full list.
 
-You are on `part-02-explore-source`, which covers article 3.
+You are on `part-03-land-raw-locally`, which covers article 4.
 
 ## Quick start
 
@@ -25,9 +25,21 @@ The initial CLI exposes:
 ```sh
 uv run --locked civic-data about
 uv run --locked civic-data version
+uv run --locked civic-data land-raw --help
 ```
 
-Use `make check` to run Ruff lint and formatting checks. See [Development](docs/development.md) for the full workflow.
+## Land a raw batch
+
+`land-raw` fetches one batch (a created-date window) as ordered CSV pages and keeps them byte-for-byte under `data/raw/<run-id>/`. It writes `manifest.json` last; a run without a manifest is incomplete and ignored downstream. With no options it lands the tutorial window, 1–7 January 2025, in pages of 10,000 rows:
+
+```sh
+uv run --locked civic-data land-raw
+uv run --locked civic-data land-raw --start 2025-01-01 --end 2025-01-03 --retries 2
+```
+
+`--end` is exclusive. Rerunning a batch creates a new run and never overwrites an earlier one. The live source can change while paging, so a run is not a transactional snapshot; see [ADR 0001](docs/adr/0001-run-completeness-and-reconciliation.md).
+
+Use `make check` to run Ruff lint and formatting checks, Pyrefly type checks, and the tests. See [Development](docs/development.md) for the full workflow.
 
 ## Project documentation
 
@@ -44,6 +56,7 @@ Use `make check` to run Ruff lint and formatting checks. See [Development](docs/
 ├── docs/
 ├── notebooks/
 ├── src/civic_service_requests/
+├── tests/
 ├── product.yaml
 ├── Makefile
 └── pyproject.toml
